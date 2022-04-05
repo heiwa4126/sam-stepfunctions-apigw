@@ -19,20 +19,40 @@ lambdaでdescribe-executionが実行されてて、
 1000個程度のトランザクションはStep Functionsに保持されるらしい。
 それ以上残したい場合はdynamoDBに入れる(TODO)
 
+# デプロイ
+
+```sh
+sam build
+sam deploy --guided  # --guidedは最初の1回
+```
+
+`sam deploy --guided` は
+
+```
+HelloWorldFunction may not have authorization defined, Is this okay? [y/N]: y
+```
+
+以外はデフォルトでいいです。
+
+デプロイが終わったら
+```sh
+./export1.sh  # 実行にはjqとyqとaws cliが必要
+```
+
+で、APIのURLを `.export.sh` に書き出してください。
 
 
+# テストの実行
+
+```sh
+./run_test.sh     # Step Functionの起動
+./result_test.sh  # Step Functionの結果の取得
+```
 
 
-[Step Functions ステートを作成マシンLambda の使用 - AWS Step Functions](https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html)
-に出てくるリソースをSAMで作成するサンプル。
+# スタックの削除
 
-CFnの AWS::StepFunctions::StateMachine ではなく
-SAMの AWS::Serverless::StateMachine を使っている。
-
-それですっきり短くなったか、というとそうでもない感じ。
-(ポリシーをインラインにしたので、見た目4つ分減っている)
-
-実際には使用していないS3が1個ある。
-
-デプロイ後のテストの方法は
-上記URLを参照。
+```sh
+sam delete --no-prompts
+```
+で消えます。

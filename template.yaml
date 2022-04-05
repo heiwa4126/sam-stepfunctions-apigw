@@ -40,6 +40,12 @@ Resources:
           Properties:
             Path: /result
             Method: post
+      Policies:
+        - Statement:
+           - Effect: Allow
+             Action: states:DescribeExecution
+             # Resource: !Sub "${HelloStateMachine.Arn}:*"
+             Resource: "*"
 
   ResultFunctionLogGroup:
     Type: AWS::Logs::LogGroup

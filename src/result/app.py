@@ -11,5 +11,10 @@ def lambda_handler(event, context):
     # なので「おおむね」動く
 
     res = SFN.describe_execution(executionArn=payload["executionArn"])
-
-    return {"statusCode": 200, "body": res}
+    # print(res)
+    return {
+        "statusCode": 200,
+        "body": json.dumps(
+            {"status": res["status"], "output": json.loads(res.get("output", "{}"))}
+        ),
+    }
