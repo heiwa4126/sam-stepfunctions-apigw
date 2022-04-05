@@ -19,7 +19,7 @@ Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: src/hello
       Handler: app.lambda_handler
 
   HelloWorldFunctionLogGroup:
@@ -47,8 +47,7 @@ Resources:
           - CloudWatchLogsLogGroup:
               LogGroupArn: !GetAtt HelloWorldStateMachineLogGroup.Arn
         IncludeExecutionData: true
-        Level: ALL              # loggingのテスト。普通はERRORで十分
-        # Level: ERROR
+        Level: ERROR
       Policies:
         - LambdaInvokePolicy:
             FunctionName: !Ref HelloWorldFunction

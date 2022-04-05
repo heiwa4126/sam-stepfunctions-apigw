@@ -6,7 +6,9 @@ WHO=Ayu
 curl -X POST \
   -H "Content-Type: application/json" \
   -d "{\"who\": \"$WHO\"}" \
+  -o tmp1.json \
   "${HelloWorldApi}/run"
 
-# https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/request-response-data-mappings.html
-# によると、Content-Typeのデフォルト値はapplication/jsonなので、省略可能らしい。
+cat tmp1.json
+executionArn=$(jq -r .executionArn tmp1.json)
+echo "executionArn=$executionArn" >tmp1.sh
