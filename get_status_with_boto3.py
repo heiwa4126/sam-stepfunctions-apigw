@@ -15,10 +15,10 @@ def main():
     with open("./tmp1.json") as f:
         data = json.load(f)
 
-        SFN = boto3.client("stepfunctions")
+    SFN = boto3.client("stepfunctions")
 
-        res = SFN.describe_execution(executionArn=data["executionArn"])
-        print(res)
+    res = SFN.describe_execution(executionArn=data["executionArn"])
+    print(res)
 
 
 if __name__ == "__main__":

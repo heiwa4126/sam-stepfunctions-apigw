@@ -5,9 +5,9 @@ STACK_NAME=$(tomlq -r .default.deploy.parameters.stack_name samconfig.toml)
 AWS_REGION=$(tomlq -r .default.deploy.parameters.region samconfig.toml)
 export AWS_REGION
 
-HelloWorldApi=$(
+HelloApi=$(
   aws cloudformation describe-stacks --stack-name "$STACK_NAME" |
-    jq -r '.Stacks[0].Outputs[]|select(.OutputKey=="HelloWorldApi").OutputValue'
+    jq -r '.Stacks[0].Outputs[]|select(.OutputKey=="HelloApi").OutputValue'
 )
 
-echo "HelloWorldApi=$HelloWorldApi" >.export.sh
+echo "HelloApi=$HelloApi" >.export.sh

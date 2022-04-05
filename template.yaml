@@ -16,25 +16,44 @@ Globals:
     OpenApiVersion: 3.0.3
 
 Resources:
-  HelloWorldFunction:
+  HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/hello
       Handler: app.lambda_handler
 
-  HelloWorldFunctionLogGroup:
+  HelloFunctionLogGroup:
     Type: AWS::Logs::LogGroup
-    DependsOn: HelloWorldFunction
+    DependsOn: HelloFunction
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub "/aws/lambda/${HelloWorldFunction}"
+      LogGroupName: !Sub "/aws/lambda/${HelloFunction}"
 
-  HelloWorldStateMachine:
+  ResultFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/result
+      Handler: app.lambda_handler
+      Events:
+        Run:
+          Type: Api
+          Properties:
+            Path: /result
+            Method: post
+
+  ResultFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: ResultFunction
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/lambda/${ResultFunction}"
+
+  HelloStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri: statemachine/hello.asl.yaml
       DefinitionSubstitutions:
-        HelloFunction: !GetAtt HelloWorldFunction.Arn
+        HelloFunction: !GetAtt HelloFunction.Arn
       Type: STANDARD
       Events:
         Run:
@@ -45,12 +64,12 @@ Resources:
       Logging:
         Destinations:
           - CloudWatchLogsLogGroup:
-              LogGroupArn: !GetAtt HelloWorldStateMachineLogGroup.Arn
+              LogGroupArn: !GetAtt HelloStateMachineLogGroup.Arn
         IncludeExecutionData: true
         Level: ERROR
       Policies:
         - LambdaInvokePolicy:
-            FunctionName: !Ref HelloWorldFunction
+            FunctionName: !Ref HelloFunction
         - Statement:
            - Effect: Allow
              Action:
@@ -62,21 +81,18 @@ Resources:
                - logs:PutResourcePolicy
                - logs:DescribeResourcePolicies
                - logs:DescribeLogGroups
-             # Resource: !GetAtt HelloWorldStateMachineLogGroup.Arn
+             # Resource: !GetAtt HelloStateMachineLogGroup.Arn
              Resource: "*"      # ↑を指定すると作成できない。理由不明
 
-  HelloWorldStateMachineLogGroup:
+  HelloStateMachineLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
       LogGroupName: !Sub
-        - "/aws/vendedlogs/states/${AWS::StackName}-HelloWorldStateMachine-${v1}-Log"
+        - "/aws/vendedlogs/states/${AWS::StackName}-HelloStateMachine-${v1}-Log"
         - {v1: !Select [2, !Split [/, !Ref AWS::StackId ]]}
 
 Outputs:
-  HelloWorldApi:
+  HelloApi:
     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApiProdStage}"
-  # HelloWorldStateMachine:
-  #   Description: "HelloWorldStateMachine ARN"
-  #   Value: !GetAtt HelloWorldStateMachine.Arn
