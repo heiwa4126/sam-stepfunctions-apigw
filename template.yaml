@@ -44,8 +44,7 @@ Resources:
         - Statement:
            - Effect: Allow
              Action: states:DescribeExecution
-             # Resource: !Sub "${HelloStateMachine.Arn}:*"
-             Resource: "*"
+             Resource: !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:execution:${HelloStateMachine.Name}:*" # too long
 
   ResultFunctionLogGroup:
     Type: AWS::Logs::LogGroup
