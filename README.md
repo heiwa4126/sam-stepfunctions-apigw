@@ -8,16 +8,17 @@ API Gateway経由でStep Functionsを起動するサンプル。
 Step Functionsのstart-executionが実行されて
 executionArnが返ってくる。
 
+Step Functionsはわざとlambda実行後10秒待つように書いてある。
+
 executionArnを引数に/resultを時々呼ぶと
 lambdaでdescribe-executionが実行されてて、
-(とりあえず最初はAPIの出力をそのまま帰す)
-結果がSUCCESSなら答えが得られる。
-結果がFAILEDのときもありうる。
+結果がSUCCEEDEDなら答えが得られる。
 
 これは簡易的なもの。
 
 1000個程度のトランザクションはStep Functionsに保持されるらしい。
-それ以上残したい場合はdynamoDBに入れる(TODO)
+それ以上残したい場合はDynamoDBに入れる(TODO)
+
 
 # デプロイ
 
@@ -46,6 +47,8 @@ HelloWorldFunction may not have authorization defined, Is this okay? [y/N]: y
 
 ```sh
 ./run_test.sh     # Step Functionの起動
+./result_test.sh  # 起動して10秒以内に呼ぶと"RUNNING"になる
+sleep 10
 ./result_test.sh  # Step Functionの結果の取得
 ```
 

@@ -4,4 +4,9 @@ States:
   HelloWorld:
     Type: Task
     Resource: ${HelloFunction}
+    Next: WaitForDebug
+  WaitForDebug:
+    # デバッグ用にわざと10秒待つ
+    Type: Wait
+    Seconds: 10
     End: true
