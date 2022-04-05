@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-stepfunctions-apigw
+
+  Sample SAM Template for sam-stepfunctions-apigw
+  See https://docs.aws.amazon.com/step-functions/latest/dg/tutorial-creating-lambda-state-machine.html
+
+Globals:
+  Function:
+    Runtime: python3.9
+    Architectures:
+      - x86_64
+    Timeout: 3
+  Api:
+    OpenApiVersion: 3.0.3
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+
+  HelloWorldFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: HelloWorldFunction
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/lambda/${HelloWorldFunction}"
+
+  HelloWorldStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachine/hello.asl.yaml
+      DefinitionSubstitutions:
+        HelloFunction: !GetAtt HelloWorldFunction.Arn
+      Type: STANDARD
+      Events:
+        Run:
+          Type: Api
+          Properties:
+            Path: /run
+            Method: post
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt HelloWorldStateMachineLogGroup.Arn
+        IncludeExecutionData: true
+        Level: ALL              # loggingのテスト。普通はERRORで十分
+        # Level: ERROR
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref HelloWorldFunction
+        - Statement:
+           - Effect: Allow
+             Action:
+               - logs:CreateLogDelivery
+               - logs:GetLogDelivery
+               - logs:UpdateLogDelivery
+               - logs:DeleteLogDelivery
+               - logs:ListLogDeliveries
+               - logs:PutResourcePolicy
+               - logs:DescribeResourcePolicies
+               - logs:DescribeLogGroups
+             # Resource: !GetAtt HelloWorldStateMachineLogGroup.Arn
+             Resource: "*"      # ↑を指定すると作成できない。理由不明
+
+  HelloWorldStateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub
+        - "/aws/vendedlogs/states/${AWS::StackName}-HelloWorldStateMachine-${v1}-Log"
+        - {v1: !Select [2, !Split [/, !Ref AWS::StackId ]]}
+
+Outputs:
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApiProdStage}"
+  # HelloWorldStateMachine:
+  #   Description: "HelloWorldStateMachine ARN"
+  #   Value: !GetAtt HelloWorldStateMachine.Arn
