@@ -30,7 +30,7 @@ sam deploy --guided  # --guidedは最初の1回
 `sam deploy --guided` は
 
 ```
-HelloWorldFunction may not have authorization defined, Is this okay? [y/N]: y
+XXXFunction may not have authorization defined, Is this okay? [y/N]: y
 ```
 
 以外はデフォルトでいいです。
